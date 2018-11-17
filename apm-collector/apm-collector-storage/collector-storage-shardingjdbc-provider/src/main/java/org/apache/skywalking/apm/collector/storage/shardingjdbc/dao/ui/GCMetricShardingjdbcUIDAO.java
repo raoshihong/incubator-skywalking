@@ -35,7 +35,7 @@ import org.apache.skywalking.apm.collector.storage.table.jvm.GCMetricTable;
 import org.apache.skywalking.apm.collector.storage.ui.common.Step;
 import org.apache.skywalking.apm.collector.storage.utils.DurationPoint;
 import org.apache.skywalking.apm.collector.storage.utils.TimePyramidTableNameBuilder;
-import org.apache.skywalking.apm.network.proto.GCPhrase;
+import org.apache.skywalking.apm.network.language.agent.GCPhrase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

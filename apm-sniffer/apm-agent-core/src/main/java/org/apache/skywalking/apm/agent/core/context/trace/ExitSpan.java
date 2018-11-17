@@ -20,7 +20,7 @@
 package org.apache.skywalking.apm.agent.core.context.trace;
 
 import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
-import org.apache.skywalking.apm.network.proto.SpanObject;
+import org.apache.skywalking.apm.network.language.agent.SpanObject;
 import org.apache.skywalking.apm.network.trace.component.Component;
 
 /**

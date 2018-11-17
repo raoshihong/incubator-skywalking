@@ -21,8 +21,8 @@ package org.apache.skywalking.apm.agent.core.jvm.gc;
 import java.lang.management.GarbageCollectorMXBean;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.skywalking.apm.network.proto.GC;
-import org.apache.skywalking.apm.network.proto.GCPhrase;
+import org.apache.skywalking.apm.network.language.agent.GC;
+import org.apache.skywalking.apm.network.language.agent.GCPhrase;
 
 /**
  * @author wusheng

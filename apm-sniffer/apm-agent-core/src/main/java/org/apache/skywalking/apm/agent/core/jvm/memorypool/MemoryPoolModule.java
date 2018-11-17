@@ -23,8 +23,8 @@ import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryUsage;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.skywalking.apm.network.proto.MemoryPool;
-import org.apache.skywalking.apm.network.proto.PoolType;
+import org.apache.skywalking.apm.network.language.agent.MemoryPool;
+import org.apache.skywalking.apm.network.language.agent.PoolType;
 
 /**
  * @author wusheng

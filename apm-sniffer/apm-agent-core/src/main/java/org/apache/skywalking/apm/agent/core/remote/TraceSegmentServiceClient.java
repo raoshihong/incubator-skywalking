@@ -32,9 +32,9 @@ import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 import org.apache.skywalking.apm.commons.datacarrier.DataCarrier;
 import org.apache.skywalking.apm.commons.datacarrier.buffer.BufferStrategy;
 import org.apache.skywalking.apm.commons.datacarrier.consumer.IConsumer;
-import org.apache.skywalking.apm.network.proto.Downstream;
-import org.apache.skywalking.apm.network.proto.TraceSegmentServiceGrpc;
-import org.apache.skywalking.apm.network.proto.UpstreamSegment;
+import org.apache.skywalking.apm.network.language.agent.Downstream;
+import org.apache.skywalking.apm.network.language.agent.TraceSegmentServiceGrpc;
+import org.apache.skywalking.apm.network.language.agent.UpstreamSegment;
 
 import static org.apache.skywalking.apm.agent.core.conf.Config.Buffer.BUFFER_SIZE;
 import static org.apache.skywalking.apm.agent.core.conf.Config.Buffer.CHANNEL_SIZE;

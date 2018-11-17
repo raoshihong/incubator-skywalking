@@ -34,7 +34,7 @@ import org.apache.skywalking.apm.agent.core.dictionary.OperationNameDictionary;
 import org.apache.skywalking.apm.agent.core.logging.api.ILog;
 import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 import org.apache.skywalking.apm.agent.core.os.OSUtil;
-import org.apache.skywalking.apm.network.proto.*;
+import org.apache.skywalking.apm.network.language.agent.*;
 import org.apache.skywalking.apm.util.RunnableWithExceptionProtection;
 
 import java.util.UUID;

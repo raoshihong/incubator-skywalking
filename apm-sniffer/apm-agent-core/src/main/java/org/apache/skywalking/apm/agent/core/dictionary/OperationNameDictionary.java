@@ -22,12 +22,12 @@ import io.netty.util.internal.ConcurrentSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.skywalking.apm.network.proto.ServiceNameCollection;
-import org.apache.skywalking.apm.network.proto.ServiceNameDiscoveryServiceGrpc;
-import org.apache.skywalking.apm.network.proto.ServiceNameElement;
-import org.apache.skywalking.apm.network.proto.ServiceNameMappingCollection;
-import org.apache.skywalking.apm.network.proto.ServiceNameMappingElement;
-import org.apache.skywalking.apm.network.proto.SpanType;
+import org.apache.skywalking.apm.network.language.agent.ServiceNameCollection;
+import org.apache.skywalking.apm.network.language.agent.ServiceNameDiscoveryServiceGrpc;
+import org.apache.skywalking.apm.network.language.agent.ServiceNameElement;
+import org.apache.skywalking.apm.network.language.agent.ServiceNameMappingCollection;
+import org.apache.skywalking.apm.network.language.agent.ServiceNameMappingElement;
+import org.apache.skywalking.apm.network.language.agent.SpanType;
 
 import static org.apache.skywalking.apm.agent.core.conf.Config.Dictionary.OPERATION_NAME_BUFFER_SIZE;
 

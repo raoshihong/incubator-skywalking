@@ -21,8 +21,8 @@ package org.apache.skywalking.apm.agent.core.jvm.memorypool;
 
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.skywalking.apm.network.proto.MemoryPool;
-import org.apache.skywalking.apm.network.proto.PoolType;
+import org.apache.skywalking.apm.network.language.agent.MemoryPool;
+import org.apache.skywalking.apm.network.language.agent.PoolType;
 
 /**
  * @author wusheng
