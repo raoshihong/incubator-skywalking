@@ -3,4 +3,4 @@
 	url = https://github.com/raoshihong/incubator-skywalking-data-collect-protocol.git
 [submodule "skywalking-ui"]
 	path = skywalking-ui
-	url = https://github.com/apache/incubator-skywalking-ui
+	url = https://github.com/raoshihong/incubator-skywalking-ui.git
