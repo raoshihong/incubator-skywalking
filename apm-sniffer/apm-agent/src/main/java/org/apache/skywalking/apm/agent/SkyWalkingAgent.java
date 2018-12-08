@@ -38,7 +38,7 @@ import org.apache.skywalking.apm.agent.core.conf.SnifferConfigInitializer;
 /**
  * The main entrance of sky-waking agent,
  * based on javaagent mechanism.
- *
+ * sky-walking 代理的主要入口，基于javaagent机制实现。
  * @author wusheng
  */
 public class SkyWalkingAgent {
@@ -46,17 +46,23 @@ public class SkyWalkingAgent {
 
     /**
      * Main entrance.
+     * 主要入口
      * Use byte-buddy transform to enhance all classes, which define in plugins.
-     *
+     *  使用byte-buddy字节码技术来增强在插件中定义的所有类。
      * @param agentArgs
-     * @param instrumentation
+     * @param instrumentation 仪表器对象
      * @throws PluginException
      */
     public static void premain(String agentArgs, Instrumentation instrumentation) throws PluginException {
         final PluginFinder pluginFinder;
         try {
-            SnifferConfigInitializer.initialize();
+            //初始化配置,加载/config/agent.config和System.env中的属性配置
+            SnifferConfigInitializer.initialize();//调试的时候,需要将config/agent.config拷贝到与agent.jar同目录去,不然就得该路径
 
+            //创建插件扩展器,这是SkyWalking提供对外插件的扩展,这些插件可以在apm-sdk-plugin模块中看到,想要那个插件就添加那个插件
+            /**
+             * skywalking有一套自己的的插件定义体系,请看apm-sniffer下的pluginREADME.md
+             */
             pluginFinder = new PluginFinder(new PluginBootstrap().loadPlugins());
 
         } catch (Exception e) {
@@ -64,18 +70,21 @@ public class SkyWalkingAgent {
             return;
         }
 
-        new AgentBuilder.Default()
-                .type(pluginFinder.buildMatch())
-                .transform(new Transformer(pluginFinder))
-                .with(new Listener())
-                .installOn(instrumentation);
+        //通过byte-buddy 字节码技术创建代理类,为什么使用的是Byte-buddy,因为byte-buddy中恰好又有javaAgent的代理类
+        new AgentBuilder.Default()//使用默认的代理构建
+                .type(pluginFinder.buildMatch())//通过插件扩展的方式来指明要代理拦截哪些类,这里使用buildMatch表示匹配的路径的类就会被拦截
+                .transform(new Transformer(pluginFinder))//通过插件扩展的方式指明自定义的拦截器和拦截的方法名,表示哪些方法需要进行增强处理
+                .with(new Listener())//使用监听器
+                .installOn(instrumentation);//调用installOn时,就是将ClassFileTransformer添加到Instrumentation中,我们在使用java探针技术时,就有这么一句inst.addTransformer(new MyTransformer());
 
         try {
+            //利用枚举的方式创建了一个ServiceManager单利(666),ServiceManager用来管理BootService
             ServiceManager.INSTANCE.boot();
         } catch (Exception e) {
             logger.error(e, "Skywalking agent boot failure.");
         }
 
+        //添加钩子线程,优雅关闭所有的BootService
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             @Override public void run() {
                 ServiceManager.INSTANCE.shutdown();
@@ -83,12 +92,14 @@ public class SkyWalkingAgent {
         }, "skywalking service shutdown thread"));
     }
 
+    //类转变期,实际上调用的就是Instrument中的ClassFileTransformer
     private static class Transformer implements AgentBuilder.Transformer {
         private PluginFinder pluginFinder;
 
         Transformer(PluginFinder pluginFinder) {
             this.pluginFinder = pluginFinder;
         }
+
 
         @Override
         public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
@@ -97,6 +108,7 @@ public class SkyWalkingAgent {
                 DynamicType.Builder<?> newBuilder = builder;
                 EnhanceContext context = new EnhanceContext();
                 for (AbstractClassEnhancePluginDefine define : pluginDefines) {
+                    //在这里调用define,对目标类进行增强,委托给其他类进行处理
                     DynamicType.Builder<?> possibleNewBuilder = define.define(typeDescription.getTypeName(), newBuilder, classLoader, context);
                     if (possibleNewBuilder != null) {
                         newBuilder = possibleNewBuilder;

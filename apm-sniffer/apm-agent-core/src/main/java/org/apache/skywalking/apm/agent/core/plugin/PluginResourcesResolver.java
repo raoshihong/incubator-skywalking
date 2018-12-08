@@ -31,7 +31,9 @@ import org.apache.skywalking.apm.agent.core.plugin.loader.AgentClassLoader;
 /**
  * Use the current classloader to read all plugin define file.
  * The file must be named 'skywalking-plugin.def'
+ * 使用当前类加载器去获取所有文件名为skywalking-plugin.def 的插件定义文件,所以skywalking的插件开发必须要有skywalking-plugin.def文件的定义
  *
+ * 可以到源码的apm-sdk-plugin下看，比如dubbo-plugin,在这个插件模块下的resources下会有一个skywalking-plugin.def文件,这个文件中指定了插件的实现类(与SPI一样)
  * @author wusheng
  */
 public class PluginResourcesResolver {
@@ -41,6 +43,7 @@ public class PluginResourcesResolver {
         List<URL> cfgUrlPaths = new ArrayList<URL>();
         Enumeration<URL> urls;
         try {
+            //获取当前类路径下的所有skywalking-plugin.def文件资源
             urls = AgentClassLoader.getDefault().getResources("skywalking-plugin.def");
 
             while (urls.hasMoreElements()) {

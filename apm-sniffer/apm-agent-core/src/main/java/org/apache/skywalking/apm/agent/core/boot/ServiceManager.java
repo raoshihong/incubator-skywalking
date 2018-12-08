@@ -42,13 +42,23 @@ public enum ServiceManager {
     private Map<Class, BootService> bootedServices = Collections.emptyMap();
 
     public void boot() {
-        bootedServices = loadAllServices();
+        //加载所有的BootService,而这些服务就是用来收集目标jvm相关的信息的服务
+        //比如：JVMService代表一个计时器服务，它收集JVM cpu，内存，内存池和gc信息，并通过GRPCChannelManager提供的渠道将收集的信息发送给收集器。
+        bootedServices = loadAllServices();//每个服务可以理解为都有自己的线程调度任务
 
+        //加载完所有的bootService后，开始调用service的方法，进行初始化,执行,完成后的执行
+
+        //service执行前的准备工作
         prepare();
+        //service执行操作
         startup();
+        //service执行完的操作
         onComplete();
     }
 
+    /**
+     * 关闭所有的services
+     */
     public void shutdown() {
         for (BootService service : bootedServices.values()) {
             try {
@@ -59,15 +69,21 @@ public enum ServiceManager {
         }
     }
 
+    /**
+     * 加载所有的service,包括带有@DefaultImplementor注解和@OverrideImplementor注解的BootService实现类
+     * @return
+     */
     private Map<Class, BootService> loadAllServices() {
         Map<Class, BootService> bootedServices = new LinkedHashMap<Class, BootService>();
         List<BootService> allServices = new LinkedList<BootService>();
+        //加载META-INF.services下定义的所有BootService的实现类
         load(allServices);
         Iterator<BootService> serviceIterator = allServices.iterator();
         while (serviceIterator.hasNext()) {
             BootService bootService = serviceIterator.next();
 
             Class<? extends BootService> bootServiceClass = bootService.getClass();
+
             boolean isDefaultImplementor = bootServiceClass.isAnnotationPresent(DefaultImplementor.class);
             if (isDefaultImplementor) {
                 if (!bootedServices.containsKey(bootServiceClass)) {
@@ -103,6 +119,7 @@ public enum ServiceManager {
         return bootedServices;
     }
 
+    //为服务执行前做准备,比如初始化一些相关的信息
     private void prepare() {
         for (BootService service : bootedServices.values()) {
             try {
@@ -145,6 +162,7 @@ public enum ServiceManager {
     }
 
     void load(List<BootService> allServices) {
+        //ServiceLoader,通过SPI的形式加载,在apm-agent-core/resources/META-INF.services/下定义了所有的BootService服务实现类
         Iterator<BootService> iterator = ServiceLoader.load(BootService.class, AgentClassLoader.getDefault()).iterator();
         while (iterator.hasNext()) {
             allServices.add(iterator.next());

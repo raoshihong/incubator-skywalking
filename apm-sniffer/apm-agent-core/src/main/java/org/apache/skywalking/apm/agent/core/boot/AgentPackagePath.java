@@ -46,6 +46,7 @@ public class AgentPackagePath {
     }
 
     private static File findPath() throws AgentPackageNotFoundException {
+        //AgentPackagePath类路径下的所有class
         String classResourcePath = AgentPackagePath.class.getName().replaceAll("\\.", "/") + ".class";
 
         URL resource = AgentPackagePath.class.getClassLoader().getSystemClassLoader().getResource(classResourcePath);

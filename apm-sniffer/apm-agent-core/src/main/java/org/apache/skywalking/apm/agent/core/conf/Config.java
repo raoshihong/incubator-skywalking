@@ -72,6 +72,7 @@ public class Config {
         public static boolean IS_OPEN_DEBUGGING_CLASS = false;
     }
 
+    //收集器服务的配置，默认通过rpc远程获取
     public static class Collector {
         /**
          * grpc channel status check interval
@@ -110,6 +111,7 @@ public class Config {
         public static String DISCOVERY_SERVICE_NAME = "/agent/gRPC";
     }
 
+    //jvm的缓存配置
     public static class Jvm {
         /**
          * The buffer size of collected JVM info.

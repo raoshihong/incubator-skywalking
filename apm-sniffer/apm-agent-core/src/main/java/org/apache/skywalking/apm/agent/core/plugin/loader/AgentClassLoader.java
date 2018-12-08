@@ -43,6 +43,7 @@ import org.apache.skywalking.apm.agent.core.plugin.PluginBootstrap;
  * which is in charge of finding plugins and interceptors.
  *
  * @author wusheng
+ * 自定义自己的代理类加载器,因为可以通过插件扩展的方式提供自定义的类加载器
  */
 public class AgentClassLoader extends ClassLoader {
     private static final ILog logger = LogManager.getLogger(AgentClassLoader.class);
@@ -51,8 +52,8 @@ public class AgentClassLoader extends ClassLoader {
      */
     private static AgentClassLoader DEFAULT_LOADER;
 
-    private List<File> classpath;
-    private List<Jar> allJars;
+    private List<File> classpath;//用来保存所有加载的类文件
+    private List<Jar> allJars;//保存所有的jar
     private ReentrantLock jarScanLock = new ReentrantLock();
 
     public static AgentClassLoader getDefault() {
@@ -69,6 +70,7 @@ public class AgentClassLoader extends ClassLoader {
         if (DEFAULT_LOADER == null) {
             synchronized (AgentClassLoader.class) {
                 if (DEFAULT_LOADER == null) {
+                    //使用插件加载器的类加载器来作为默认的Agent代理类加载器
                     DEFAULT_LOADER = new AgentClassLoader(PluginBootstrap.class.getClassLoader());
                 }
             }
@@ -84,6 +86,12 @@ public class AgentClassLoader extends ClassLoader {
         classpath.add(new File(agentDictionary, "activations"));
     }
 
+    /**
+     * 根据名称查找指定的类
+     * @param name
+     * @return
+     * @throws ClassNotFoundException
+     */
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
         List<Jar> allJars = getAllJars();
@@ -97,6 +105,7 @@ public class AgentClassLoader extends ClassLoader {
                     BufferedInputStream is = null;
                     ByteArrayOutputStream baos = null;
                     try {
+                        //读取类的二进制数据
                         is = new BufferedInputStream(classFileUrl.openStream());
                         baos = new ByteArrayOutputStream();
                         int ch = 0;
@@ -116,6 +125,7 @@ public class AgentClassLoader extends ClassLoader {
                             } catch (IOException ignored) {
                             }
                     }
+                    //根据类的二进制数据构建一个Class对象返回
                     return defineClass(name, data, 0, data.length);
                 } catch (MalformedURLException e) {
                     logger.error(e, "find class fail.");

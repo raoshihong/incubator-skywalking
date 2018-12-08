@@ -36,12 +36,15 @@ import org.apache.skywalking.apm.util.StringUtil;
 
 /**
  * The <code>SnifferConfigInitializer</code> initializes all configs in several way.
+ * SnifferConfigInitializer以多种方式初始化所有配置。
  *
  * @author wusheng
  */
 public class SnifferConfigInitializer {
     private static final ILog logger = LogManager.getLogger(SnifferConfigInitializer.class);
+    //默认指定/config/agent.config配置文件
     private static String CONFIG_FILE_NAME = "/config/agent.config";
+    //环境变量的前缀为skywalking.
     private static String ENV_KEY_PREFIX = "skywalking.";
     private static boolean IS_INIT_COMPLETED = false;
 
@@ -53,11 +56,21 @@ public class SnifferConfigInitializer {
      * `agent.application_code` in config file.
      * <p>
      * At the end, `agent.application_code` and `collector.servers` must be not blank.
+     *
+     * initialize方法会先尝试获取本地/config目录下的agent.config配置文件，也会尝试从system.properties或者system.env系统环境变量中获取配置
+     * 所有的属性变量的key都应该以ENV_KEY_PREFIX 即skywalking. 开头,例如在evn系统环境变量中的skywalking.agent.application_code=yourAppName
+     * 将会覆盖agent.config中的agent.application_code属性的值
+     *
+     * 也就是有一下加载顺序
+     * 1.加载本地/config/agent.config配置文件的属性
+     * 2.加载SystemEnv中的属性，并覆盖agent.config中已有的属性
+     *
      */
     public static void initialize() throws ConfigNotFoundException, AgentPackageNotFoundException {
         InputStreamReader configFileStream;
 
         try {
+            //加载本地的agent.config配置文件的属性
             configFileStream = loadConfigFromAgentFolder();
             Properties properties = new Properties();
             properties.load(configFileStream);
@@ -67,6 +80,7 @@ public class SnifferConfigInitializer {
         }
 
         try {
+            //加载System.env中的属性,并覆盖agent.config中的属性配置
             overrideConfigBySystemEnv();
         } catch (Exception e) {
             logger.error(e, "Failed to read the system env.");

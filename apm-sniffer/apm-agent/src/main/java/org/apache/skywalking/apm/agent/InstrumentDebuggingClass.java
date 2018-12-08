@@ -30,6 +30,7 @@ import org.apache.skywalking.apm.agent.core.logging.api.ILog;
 import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 
 /**
+ * 这个类是用来调试的,会将增强的类保存到debugging目录下
  * @author wu-sheng
  */
 public enum InstrumentDebuggingClass {

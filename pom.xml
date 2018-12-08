@@ -65,6 +65,7 @@
         <module>apm-protocol</module>
         <module>apm-webapp</module>
         <module>apm-dist</module>
+        <module>study-skywalking</module>
     </modules>
     <packaging>pom</packaging>
 

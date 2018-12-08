@@ -51,25 +51,43 @@ import java.util.concurrent.TimeUnit;
  * which collectors JVM cpu, memory, memorypool and gc info,
  * and send the collected info to Collector through the channel provided by {@link GRPCChannelManager}
  *
+ * JVMService代表一个计时器，它收集JVM cpu，内存，内存池和gc信息，并通过{@link GRPCChannelManager}提供的渠道将收集的信息发送给收集器。
+ *
  * @author wusheng
  */
 @DefaultImplementor
 public class JVMService implements BootService, Runnable {
     private static final ILog logger = LogManager.getLogger(JVMService.class);
     private LinkedBlockingQueue<JVMMetric> queue;
+    //收集调度
     private volatile ScheduledFuture<?> collectMetricFuture;
+    //发送调度
     private volatile ScheduledFuture<?> sendMetricFuture;
     private Sender sender;
 
+    /**
+     * 执行前的准备
+     * @throws Throwable
+     */
     @Override
     public void prepare() throws Throwable {
+        //执行数据收集前的准备
+        //初始化一个队列,默认队列大小为60*10
         queue = new LinkedBlockingQueue(Config.Jvm.BUFFER_SIZE);
+        //创建一个发送器,这里默认为grpc
         sender = new Sender();
+        //再通过GRPCChannelManager,对sender进行监听,监听到数据，则通过GRPCChannelManager将信息发送给apm-collector服务
         ServiceManager.INSTANCE.findService(GRPCChannelManager.class).addChannelListener(sender);
     }
 
+    /**
+     * 服务执行方法
+     * @throws Throwable
+     */
     @Override
     public void boot() throws Throwable {
+        //创建一个调度任务,任务名称为JVMService-produce
+        //这个调度任务是执行this 对象的run，即当前JVMService自己的run方法,从0秒开始,每隔1秒执行一次
         collectMetricFuture = Executors
             .newSingleThreadScheduledExecutor(new DefaultNamedThreadFactory("JVMService-produce"))
             .scheduleAtFixedRate(new RunnableWithExceptionProtection(this, new RunnableWithExceptionProtection.CallbackWhenException() {
@@ -77,6 +95,8 @@ public class JVMService implements BootService, Runnable {
                     logger.error("JVMService produces metrics failure.", t);
                 }
             }), 0, 1, TimeUnit.SECONDS);
+
+        //发送任务,从0秒开始,每隔1秒执行一次,sender
         sendMetricFuture = Executors
             .newSingleThreadScheduledExecutor(new DefaultNamedThreadFactory("JVMService-consume"))
             .scheduleAtFixedRate(new RunnableWithExceptionProtection(sender, new RunnableWithExceptionProtection.CallbackWhenException() {
@@ -92,6 +112,10 @@ public class JVMService implements BootService, Runnable {
 
     }
 
+    /**
+     * 关闭服务就是将这个service中的调度任务给取消
+     * @throws Throwable
+     */
     @Override
     public void shutdown() throws Throwable {
         collectMetricFuture.cancel(true);
@@ -100,11 +124,13 @@ public class JVMService implements BootService, Runnable {
 
     @Override
     public void run() {
+        //搜集jvm的相关信息,如cpu,memory,gc等,将搜集到的信息放到queue队列中
         if (RemoteDownstreamConfig.Agent.APPLICATION_ID != DictionaryUtil.nullValue()
             && RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID != DictionaryUtil.nullValue()
             ) {
             long currentTimeMillis = System.currentTimeMillis();
             try {
+                //获取jvm信息
                 JVMMetric.Builder jvmBuilder = JVMMetric.newBuilder();
                 jvmBuilder.setTime(currentTimeMillis);
                 jvmBuilder.setCpu(CPUProvider.INSTANCE.getCpuMetric());
@@ -129,6 +155,7 @@ public class JVMService implements BootService, Runnable {
 
         @Override
         public void run() {
+            //执行发送,将搜集的jvm信息发送到apm-collector服务中
             if (RemoteDownstreamConfig.Agent.APPLICATION_ID != DictionaryUtil.nullValue()
                 && RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID != DictionaryUtil.nullValue()
                 ) {
@@ -140,6 +167,7 @@ public class JVMService implements BootService, Runnable {
                         if (buffer.size() > 0) {
                             builder.addAllMetrics(buffer);
                             builder.setApplicationInstanceId(RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID);
+                            //通过grpc发送信息
                             stub.collect(builder.build());
                         }
                     } catch (Throwable t) {

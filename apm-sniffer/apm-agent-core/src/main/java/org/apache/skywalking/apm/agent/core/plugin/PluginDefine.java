@@ -38,6 +38,12 @@ public class PluginDefine {
         this.defineClass = defineClass;
     }
 
+    /**
+     * 解析skywalking-plugin.def中的每一行的内容,并构建成一个PluginDefine对象
+     * @param define
+     * @return
+     * @throws IllegalPluginDefineException
+     */
     public static PluginDefine build(String define) throws IllegalPluginDefineException {
         if (StringUtil.isEmpty(define)) {
             throw new IllegalPluginDefineException(define);

@@ -25,13 +25,18 @@ package org.apache.skywalking.apm.agent.core.boot;
  * {@link #boot()} will be called when <code>BootService</code> start up.
  *
  * @author wusheng
+ * 每个service中都有自己的调度任务executor
  */
 public interface BootService {
+    //服务执行前的准备
     void prepare() throws Throwable;
 
+    //服务执行方法
     void boot() throws Throwable;
 
+    //服务执行完成的处理的方法
     void onComplete() throws Throwable;
 
+    //关闭服务
     void shutdown() throws Throwable;
 }

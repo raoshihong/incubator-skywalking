@@ -46,6 +46,13 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
  * instance methods, or both, {@link ClassEnhancePluginDefine} will add a field of {@link
  * Object} type.
  *
+ *
+ * 此类控制所有增强操作，包括增强构造函数，实例方法和静态方法。
+ * 所有增强基于三种类型的拦截点：{@ link ConstructorInterceptPoint}，{@ link InstanceMethodsInterceptPoint}和{@link StaticMethodsInterceptPoint}
+ * 如果插件要增强构造函数，实例方法或两者，{@link ClassEnhancePluginDefine}将添加一个字段 @@link Object}类型。
+ *
+ * 所以子类只需要实现ConstructorInterceptPoint或者InstanceMethodsInterceptPoint或者StaticMethodsInterceptPoint这三个方法即可实现插件增强
+ *
  * @author wusheng
  */
 public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePluginDefine {
@@ -58,11 +65,14 @@ public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePlugi
 
     /**
      * Begin to define how to enhance class.
+     * 开始定义如何增强类。
      * After invoke this method, only means definition is finished.
-     *
-     * @param enhanceOriginClassName target class name
-     * @param newClassBuilder byte-buddy's builder to manipulate class bytecode.
+     * 调用此方法后，仅表示定义已完成。
+     * @param enhanceOriginClassName target class name 目标类
+     * @param newClassBuilder byte-buddy's builder to manipulate class bytecode. 增加后的
      * @return new byte-buddy's builder for further manipulation.
+     *
+     * 通过这个方法将原始类通过byte-buddy字节码技术增强后返回DynamicType.Builder对象
      */
     @Override
     protected DynamicType.Builder<?> enhance(String enhanceOriginClassName,
@@ -78,6 +88,8 @@ public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePlugi
     /**
      * Enhance a class to intercept constructors and class instance methods.
      *
+     * 增强类以拦截构造函数和类实例方法。
+     *
      * @param enhanceOriginClassName target class name
      * @param newClassBuilder byte-buddy's builder to manipulate class bytecode.
      * @return new byte-buddy's builder for further manipulation.
@@ -85,7 +97,12 @@ public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePlugi
     private DynamicType.Builder<?> enhanceInstance(String enhanceOriginClassName,
         DynamicType.Builder<?> newClassBuilder, ClassLoader classLoader,
         EnhanceContext context) throws PluginException {
+
+        //调用子类实现的构造方法拦截器方法,比如dubbo-plugin的DubboInstrumentation.getConstructorsInterceptPoints()方法
         ConstructorInterceptPoint[] constructorInterceptPoints = getConstructorsInterceptPoints();
+        //调用子类实现的构造方法拦截器方法,比如dubbo-plugin的DubboInstrumentation.getInstanceMethodsInterceptPoints()方法
+
+        //在这些方法中定义要拦截的哪些方法的名称
         InstanceMethodsInterceptPoint[] instanceMethodsInterceptPoints = getInstanceMethodsInterceptPoints();
 
         boolean existedConstructorInterceptPoint = false;
@@ -99,6 +116,7 @@ public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePlugi
 
         /**
          * nothing need to be enhanced in class instance, maybe need enhance static methods.
+         * 如果子类都没实现,则直接返回默认的增强对象
          */
         if (!existedConstructorInterceptPoint && !existedMethodsInterceptPoints) {
             return newClassBuilder;
@@ -115,17 +133,20 @@ public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePlugi
          *
          */
         if (!context.isObjectExtended()) {
+            //添加一个属性
             newClassBuilder = newClassBuilder.defineField(CONTEXT_ATTR_NAME, Object.class, ACC_PRIVATE)
                 .implement(EnhancedInstance.class)
-                .intercept(FieldAccessor.ofField(CONTEXT_ATTR_NAME));
+                .intercept(FieldAccessor.ofField(CONTEXT_ATTR_NAME));//使用FieldAccessor拦截器
             context.extendObjectCompleted();
         }
 
         /**
          * 2. enhance constructors
+         * 构造方法的增强
          */
         if (existedConstructorInterceptPoint) {
             for (ConstructorInterceptPoint constructorInterceptPoint : constructorInterceptPoints) {
+                //在这里对构造方法添加拦截器,使用constructorInterceptPoint.getConstructorMatcher()获取拦截器实现类
                 newClassBuilder = newClassBuilder.constructor(constructorInterceptPoint.getConstructorMatcher()).intercept(SuperMethodCall.INSTANCE
                     .andThen(MethodDelegation.withDefaultConfiguration()
                         .to(new ConstructorInter(constructorInterceptPoint.getConstructorInterceptor(), classLoader))
@@ -136,14 +157,18 @@ public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePlugi
 
         /**
          * 3. enhance instance methods
+         * 实例方法的增强
          */
         if (existedMethodsInterceptPoints) {
             for (InstanceMethodsInterceptPoint instanceMethodsInterceptPoint : instanceMethodsInterceptPoints) {
+                //获取拦截器实现类的名称
                 String interceptor = instanceMethodsInterceptPoint.getMethodsInterceptor();
                 if (StringUtil.isEmpty(interceptor)) {
                     throw new EnhanceException("no InstanceMethodsAroundInterceptor define to enhance class " + enhanceOriginClassName);
                 }
 
+
+                //下面是通过byte-buddy指定拦截器实现类,这样在调用目标方法时就会执行拦截器的方法
                 if (instanceMethodsInterceptPoint.isOverrideArgs()) {
                     newClassBuilder =
                         newClassBuilder.method(not(isStatic()).and(instanceMethodsInterceptPoint.getMethodsMatcher()))
@@ -184,6 +209,7 @@ public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePlugi
 
     /**
      * Enhance a class to intercept class static methods.
+     * 增强类对静态方法的拦截
      *
      * @param enhanceOriginClassName target class name
      * @param newClassBuilder byte-buddy's builder to manipulate class bytecode.

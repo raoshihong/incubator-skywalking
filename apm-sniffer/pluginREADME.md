@@ -1,0 +1,14 @@
+skywalking插件体系定义
+
+1.插件的加载
+AgentPackagePath
+AgentClassLoader自定义类加载器
+PluginBootstrap 插件加载器
+PluginResourcesResolver 插件资源加载器,加载所有的skywalking-plugin.def文件
+PluginCfg 解析skywalking-plugin.def中的内容
+PluginDefine 对skywalking-plugin.def内容中每一行的定义key-value
+AbstractClassEnhancePluginDefine
+
+
+
+

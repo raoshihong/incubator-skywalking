@@ -39,6 +39,8 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
  * The <code>PluginFinder</code> represents a finder , which assist to find the one
  * from the given {@link AbstractClassEnhancePluginDefine} list.
  *
+ * PluginFinder代表一个finder，它有助于从给定的{@link AbstractClassEnhancePluginDefine}列表中找到一个匹配的插件。
+ *
  * @author wusheng
  */
 public class PluginFinder {

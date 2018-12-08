@@ -27,16 +27,19 @@ import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
  * The <code>RemoteDownstreamConfig</code> includes configurations from collector side.
  * All of them initialized null, Null-Value or empty collection.
  *
+ * 远程配置
+ *
  * @author wusheng
  */
 public class RemoteDownstreamConfig {
-    public static class Agent {
+    public static class Agent {//代理的配置
         public volatile static int APPLICATION_ID = DictionaryUtil.nullValue();
 
+        //对应服务的id
         public volatile static int APPLICATION_INSTANCE_ID = DictionaryUtil.nullValue();
     }
 
-    public static class Collector {
+    public static class Collector {//搜集器服务的配置,默认是通过grpc交互的
         /**
          * Collector GRPC-Service address.
          */

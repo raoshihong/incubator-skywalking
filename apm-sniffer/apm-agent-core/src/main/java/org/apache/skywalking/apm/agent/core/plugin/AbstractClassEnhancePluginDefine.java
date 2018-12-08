@@ -28,24 +28,32 @@ import org.apache.skywalking.apm.util.StringUtil;
 
 /**
  * Basic abstract class of all sky-walking auto-instrumentation plugins.
+ * 所有sky-walking instrumentation插件的基类
  * <p>
  * It provides the outline of enhancing the target class.
+ * 它提供了增强目标类的概述
  * If you want to know more about enhancing, you should go to see {@link ClassEnhancePluginDefine}
+ * 如果您想了解有关增强的更多信息，请访问{@link ClassEnhancePluginDefine}
+ *
+ * ClassEnhancePluginDefine 这个子类实现了更加具体的增强
+ *
+ * 不同的插件实现这个基类,来定义不同框架的切面，记录调用链路
  */
 public abstract class AbstractClassEnhancePluginDefine {
     private static final ILog logger = LogManager.getLogger(AbstractClassEnhancePluginDefine.class);
 
     /**
      * Main entrance of enhancing the class.
-     *
-     * @param transformClassName target class.
-     * @param builder byte-buddy's builder to manipulate target class's bytecode.
+     * 类增强器的主要入口
+     * @param transformClassName target class. 目标方法
+     * @param builder byte-buddy's builder to manipulate target class's bytecode. byte-buddy对象
      * @param classLoader load the given transformClass
      * @return the new builder, or <code>null</code> if not be enhanced.
      * @throws PluginException when set builder failure.
      */
     public DynamicType.Builder<?> define(String transformClassName,
         DynamicType.Builder<?> builder, ClassLoader classLoader, EnhanceContext context) throws PluginException {
+        //
         String interceptorDefineClassName = this.getClass().getName();
 
         if (StringUtil.isEmpty(transformClassName)) {
@@ -57,6 +65,7 @@ public abstract class AbstractClassEnhancePluginDefine {
 
         /**
          * find witness classes for enhance class
+         * 找到增加类的witness classes
          */
         String[] witnessClasses = witnessClasses();
         if (witnessClasses != null) {
@@ -72,6 +81,8 @@ public abstract class AbstractClassEnhancePluginDefine {
         /**
          * find origin class source code for interceptor
          */
+        //这里通过子类实现enhance方法来返回增强后的类DynamicType实例,而通过newClassBuilder.make().load().getLoaded()就可以返回增强类的Class实例,进而可以通过反射进行调用
+        //这里的enhance可以查看
         DynamicType.Builder<?> newClassBuilder = this.enhance(transformClassName, builder, classLoader, context);
 
         context.initializationStageCompleted();
@@ -80,6 +91,15 @@ public abstract class AbstractClassEnhancePluginDefine {
         return newClassBuilder;
     }
 
+    /**
+     * 定义增加方法,子类实现
+     * @param enhanceOriginClassName
+     * @param newClassBuilder
+     * @param classLoader
+     * @param context
+     * @return
+     * @throws PluginException
+     */
     protected abstract DynamicType.Builder<?> enhance(String enhanceOriginClassName,
         DynamicType.Builder<?> newClassBuilder, ClassLoader classLoader, EnhanceContext context) throws PluginException;
 
