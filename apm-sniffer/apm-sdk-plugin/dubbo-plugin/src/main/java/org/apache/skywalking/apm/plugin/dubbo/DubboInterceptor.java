@@ -41,6 +41,8 @@ import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
  * Invocation)}. the trace context transport to the provider side by {@link RpcContext#attachments}.but all the version
  * of dubbo framework below 2.8.3 don't support {@link RpcContext#attachments}, we support another way to support it.
  *
+ * 在com.alibaba.dubbo.monitor.support.MonitorFilter的invoke方法调用时被拦截
+ *
  * @author zhangxin
  */
 public class DubboInterceptor implements InstanceMethodsAroundInterceptor {

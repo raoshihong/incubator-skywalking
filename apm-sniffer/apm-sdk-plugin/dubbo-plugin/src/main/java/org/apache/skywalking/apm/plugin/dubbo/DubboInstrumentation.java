@@ -28,6 +28,13 @@ import org.apache.skywalking.apm.agent.core.plugin.match.NameMatch;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
+/**
+ * skywalking的插件的定义有以下几点
+ * 1.定义指明要拦截的类,通过enhanceClass返回
+ * 2.定义要拦截静态方法对应的拦截器以及要拦截的方法，见getStaticMethodsInterceptPoints()方法
+ * 2.定义拦截构造方法对应的拦截器以及要拦截的方法 ，见getConstructorsInterceptPoints()方法
+ * 3.定义拦截实例方法对应的拦截器以及要拦截的方法，见getInstanceMethodsInterceptPoints()方法
+ */
 public class DubboInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
     private static final String ENHANCE_CLASS = "com.alibaba.dubbo.monitor.support.MonitorFilter";
@@ -35,6 +42,7 @@ public class DubboInstrumentation extends ClassInstanceMethodsEnhancePluginDefin
 
     @Override
     protected ClassMatch enhanceClass() {
+        //自定义要匹配的目标类,指明要代理这个类
         return NameMatch.byName(ENHANCE_CLASS);
     }
 
@@ -47,16 +55,19 @@ public class DubboInstrumentation extends ClassInstanceMethodsEnhancePluginDefin
     protected InstanceMethodsInterceptPoint[] getInstanceMethodsInterceptPoints() {
         return new InstanceMethodsInterceptPoint[] {
             new InstanceMethodsInterceptPoint() {
+                //定义匹配(拦截)规则，即要拦截目标类的哪个方法
                 @Override
                 public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return named("invoke");
+                    return named("invoke");//表示匹配到方法名为invoke,即拦截方法invoke
                 }
 
+                //定义拦截器
                 @Override
                 public String getMethodsInterceptor() {
                     return INTERCEPT_CLASS;
                 }
 
+                //指明是否要覆盖参数
                 @Override
                 public boolean isOverrideArgs() {
                     return false;

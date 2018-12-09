@@ -44,11 +44,19 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
  * @author wusheng
  */
 public class PluginFinder {
+    //保存要匹配的定义,其实就是要拦截哪个类,以dubbo-plugin为例,指明了拦截com.alibaba.dubbo.monitor.support.MonitorFilter 类
     private final Map<String, LinkedList<AbstractClassEnhancePluginDefine>> nameMatchDefine = new HashMap<String, LinkedList<AbstractClassEnhancePluginDefine>>();
+    //
     private final List<AbstractClassEnhancePluginDefine> signatureMatchDefine = new LinkedList<AbstractClassEnhancePluginDefine>();
 
+    /**
+     * 从已加载的所有插件中,查找定义的要拦截的类
+     * @param plugins
+     */
     public PluginFinder(List<AbstractClassEnhancePluginDefine> plugins) {
         for (AbstractClassEnhancePluginDefine plugin : plugins) {
+
+            //获取要被代理的目标类,这个匹配的定义在各个插件中自定义
             ClassMatch match = plugin.enhanceClass();
 
             if (match == null) {
@@ -56,7 +64,9 @@ public class PluginFinder {
             }
 
             if (match instanceof NameMatch) {
+                //根据名称匹配
                 NameMatch nameMatch = (NameMatch)match;
+                //通过定义的要拦截的类名查找是否已经保存了
                 LinkedList<AbstractClassEnhancePluginDefine> pluginDefines = nameMatchDefine.get(nameMatch.getClassName());
                 if (pluginDefines == null) {
                     pluginDefines = new LinkedList<AbstractClassEnhancePluginDefine>();
@@ -69,6 +79,12 @@ public class PluginFinder {
         }
     }
 
+    /**
+     * 查找typeDescription类型对应的匹配的插件定义
+     * @param typeDescription
+     * @param classLoader
+     * @return
+     */
     public List<AbstractClassEnhancePluginDefine> find(TypeDescription typeDescription,
         ClassLoader classLoader) {
         List<AbstractClassEnhancePluginDefine> matchedPlugins = new LinkedList<AbstractClassEnhancePluginDefine>();
@@ -87,8 +103,13 @@ public class PluginFinder {
         return matchedPlugins;
     }
 
+    /**
+     *  自定义匹配（拦截）规则
+     * @return  返回一个定义匹配规则对象ElementMatcher,给AgentBuild,这样就知道要拦截哪个类,这样byte-buddy在代理时就会调用这里的matches方法进行判断
+     */
     public ElementMatcher<? super TypeDescription> buildMatch() {
         ElementMatcher.Junction judge = new AbstractJunction<NamedElement>() {
+            //matches方法会在拦截的
             @Override
             public boolean matches(NamedElement target) {
                 return nameMatchDefine.containsKey(target.getActualName());

@@ -78,8 +78,11 @@ public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePlugi
     protected DynamicType.Builder<?> enhance(String enhanceOriginClassName,
         DynamicType.Builder<?> newClassBuilder, ClassLoader classLoader,
         EnhanceContext context) throws PluginException {
+
+        //对目标类的静态方法添加拦截器
         newClassBuilder = this.enhanceClass(enhanceOriginClassName, newClassBuilder, classLoader);
 
+        //对目标类的实例方法添加拦截器
         newClassBuilder = this.enhanceInstance(enhanceOriginClassName, newClassBuilder, classLoader, context);
 
         return newClassBuilder;
@@ -170,6 +173,12 @@ public abstract class ClassEnhancePluginDefine extends AbstractClassEnhancePlugi
 
                 //下面是通过byte-buddy指定拦截器实现类,这样在调用目标方法时就会执行拦截器的方法
                 if (instanceMethodsInterceptPoint.isOverrideArgs()) {
+
+                    //method和intercept指明要拦截的目标方法和拦截器类
+                    //而这个要拦截哪个目标方法定义就来源与自定义插件中的getMethodsMatcher()方法
+                    //而拦截器就来源与自定义插件中的getMethodsInterceptor
+                    //如dubbo-plugin中的org.apache.skywalking.apm.agent.core.plugin.interceptor.InstanceMethodsInterceptPoint.getMethodsMatcher
+                    //和org.apache.skywalking.apm.agent.core.plugin.interceptor.InstanceMethodsInterceptPoint.getMethodsInterceptor
                     newClassBuilder =
                         newClassBuilder.method(not(isStatic()).and(instanceMethodsInterceptPoint.getMethodsMatcher()))
                             .intercept(

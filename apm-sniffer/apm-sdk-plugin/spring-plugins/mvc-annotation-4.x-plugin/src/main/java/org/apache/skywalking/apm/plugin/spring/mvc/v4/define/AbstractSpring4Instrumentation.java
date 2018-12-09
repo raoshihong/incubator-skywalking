@@ -24,6 +24,10 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.ClassInst
 public abstract class AbstractSpring4Instrumentation extends ClassInstanceMethodsEnhancePluginDefine {
     public static final String WITHNESS_CLASSES = "org.springframework.web.servlet.tags.ArgumentTag";
 
+    /**
+     * 定义见证类列表
+     * @return
+     */
     @Override
     protected final String[] witnessClasses() {
         return new String[] {WITHNESS_CLASSES};

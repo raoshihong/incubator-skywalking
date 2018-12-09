@@ -77,6 +77,12 @@ public class SkyWalkingAgent {
                 .with(new Listener())//使用监听器
                 .installOn(instrumentation);//调用installOn时,就是将ClassFileTransformer添加到Instrumentation中,我们在使用java探针技术时,就有这么一句inst.addTransformer(new MyTransformer());
 
+        /**
+         * installOn方法关键有两步
+         * ResettableClassFileTransformer classFileTransformer = makeRaw(installation.getListener(), installation.getInstallationListener());
+         * instrumentation.addTransformer(classFileTransformer, redefinitionStrategy.isRetransforming());
+         */
+
         try {
             //利用枚举的方式创建了一个ServiceManager单利(666),ServiceManager用来管理BootService
             ServiceManager.INSTANCE.boot();
@@ -93,6 +99,13 @@ public class SkyWalkingAgent {
     }
 
     //类转变期,实际上调用的就是Instrument中的ClassFileTransformer
+
+    /**
+     * SkyWalking自定义了自己的Transformer,实现AgentBuilder.Transformer
+     * Transformer的transform方法会在ClassFileTransform的transform方法调用后被调用,从而对目标方法进行增加添加拦截器
+     * 在这个Transform中指定了拦截器和拦截器的方法
+     * 通过PluginFinder查找到各个apm-sdk-plugin中自定义插件中实现的类实例方法增强ClassInstanceMethodsEnhancePluginDefine插件定义和拦截器
+     */
     private static class Transformer implements AgentBuilder.Transformer {
         private PluginFinder pluginFinder;
 
@@ -101,14 +114,34 @@ public class SkyWalkingAgent {
         }
 
 
+        /**
+         * 作用:指定拦截目标方法和绑定拦截器
+         *
+         * 这个方法在调用在ClassFileLoad事件出发调用ClassFileTransform.transform时被调用
+         *
+         * skywalking利用这个方法,实现了插件体系,通过自定义插件的形式,获取插件中定义的拦截器和拦截定义类(指定拦截器和要拦截的哪个目标方法 )
+         *
+         * @param builder
+         * @param typeDescription
+         * @param classLoader
+         * @param module
+         * @return
+         */
         @Override
         public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+            //获取加载的类对应类型的增加插件类
             List<AbstractClassEnhancePluginDefine> pluginDefines = pluginFinder.find(typeDescription, classLoader);
             if (pluginDefines.size() > 0) {
                 DynamicType.Builder<?> newBuilder = builder;
                 EnhanceContext context = new EnhanceContext();
+                //获取每个插件的定义
                 for (AbstractClassEnhancePluginDefine define : pluginDefines) {
                     //在这里调用define,对目标类进行增强,委托给其他类进行处理
+                    //在define方法中有两个主要步骤：
+                    // 1.解析了自定义插件中的拦截器类和要拦截的目标方法,
+                    // 2.并通过byte-buddy中的AgentBudiler绑定了自定义的插件的拦截器
+
+                    //最终返回一个目标类的代理类实例
                     DynamicType.Builder<?> possibleNewBuilder = define.define(typeDescription.getTypeName(), newBuilder, classLoader, context);
                     if (possibleNewBuilder != null) {
                         newBuilder = possibleNewBuilder;
@@ -126,19 +159,30 @@ public class SkyWalkingAgent {
         }
     }
 
+    /**
+     * 增强处理的监听
+     */
     private static class Listener implements AgentBuilder.Listener {
         @Override
         public void onDiscovery(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
 
         }
 
+        /**
+         * 当调用transform修改成功时,调用这个方法
+         * @param typeDescription
+         * @param classLoader
+         * @param module
+         * @param loaded
+         * @param dynamicType
+         */
         @Override
         public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module,
                                      boolean loaded, DynamicType dynamicType) {
             if (logger.isDebugEnable()) {
                 logger.debug("On Transformation class {}.", typeDescription.getName());
             }
-
+            //将成功代理的类保存
             InstrumentDebuggingClass.INSTANCE.log(typeDescription, dynamicType);
         }
 
