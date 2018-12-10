@@ -34,12 +34,14 @@ import org.apache.skywalking.apm.network.language.agent.UpstreamSegment;
  * {@link TraceSegment} is a segment or fragment of the distributed trace. See https://github.com/opentracing/specification/blob/master/specification.md#the-opentracing-data-model
  * A {@link TraceSegment} means the segment, which exists in current {@link Thread}. And the distributed trace is formed
  * by multi {@link TraceSegment}s, because the distributed trace crosses multi-processes, multi-threads. <p>
- *
+ *  {@link TraceSegment}是分布式跟踪的片段或分段。
+ *  {@link TraceSegment}表示当前{@link Thread}中存在的段。 分布式跟踪由多个{@link TraceSegment}组成，因为分布式跟踪跨越多进程，多线程。
  * @author wusheng
  */
 public class TraceSegment {
     /**
      * The id of this trace segment. Every segment has its unique-global-id.
+     * 每个链路跟踪端的唯一id。 每个分段都有一个全局唯一的id
      */
     private ID traceSegmentId;
 
@@ -48,13 +50,19 @@ public class TraceSegment {
      * element, but if this segment is a start span of batch process, the segment faces multi parents, at this moment,
      * we use this {@link #refs} to link them.
      *
+     * 父级跟踪段的引用，除主要跟踪段之外。 对于大多数RPC调用，{@link #refs}只包含一个元素，但如果此段是批处理的起始跨度，则该段面向多个父项，
+     * 此时，我们使用此{@link #refs}链接它们。
+     *
      * This field will not be serialized. Keeping this field is only for quick accessing.
+     * 该字段不会被序列化。 保留此字段仅用于快速访问。
      */
     private List<TraceSegmentRef> refs;
 
     /**
      * The spans belong to this trace segment. They all have finished. All active spans are hold and controlled by
      * "skywalking-api" module.
+     *
+     * 跨度属于此跟踪段。 他们都已经完成了。 所有活动的跨度都由“skywalking-api”模块保持和控制。
      */
     private List<AbstractTracingSpan> spans;
 

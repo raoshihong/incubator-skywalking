@@ -43,12 +43,19 @@ import org.apache.skywalking.apm.agent.core.sampling.SamplingService;
  * The <code>TracingContext</code> represents a core tracing logic controller. It build the final {@link
  * TracingContext}, by the stack mechanism, which is similar with the codes work.
  *
+ * TracingContext表示核心跟踪逻辑控制器。 它通过堆栈机制构建最终的{@link TracingContext}，这与代码工作类似。
+ *
  * In opentracing concept, it means, all spans in a segment tracing context(thread) are CHILD_OF relationship, but no
  * FOLLOW_OF.
+ *
+ * 在opentracing概念中，它意味着，段跟踪上下文（线程）中的所有span都是CHILD_OF关系，但没有FOLLOW_OF。
  *
  * In skywalking core concept, FOLLOW_OF is an abstract concept when cross-process MQ or cross-thread async/batch tasks
  * happen, we used {@link TraceSegmentRef} for these scenarios. Check {@link TraceSegmentRef} which is from {@link
  * ContextCarrier} or {@link ContextSnapshot}.
+ *
+ *
+ * 核心链路跟踪上下文管理实现类
  *
  * @author wusheng
  * @author zhang xin
@@ -98,24 +105,33 @@ public class TracingContext implements AbstractTracerContext {
     /**
      * Inject the context into the given carrier, only when the active span is an exit one.
      *
+     * 仅当活动的span为退出时，才将上下文注入到给定的carrier载体中。
+     *
      * @param carrier to carry the context for crossing process.
      * @throws IllegalStateException if the active span isn't an exit one.
      * Ref to {@link AbstractTracerContext#inject(ContextCarrier)}
      */
     @Override
     public void inject(ContextCarrier carrier) {
+        //获取当前线程中链路活跃的span
         AbstractSpan span = this.activeSpan();
         if (!span.isExit()) {
+            //如果span不是在退出时,则不能注入
             throw new IllegalStateException("Inject can be done only in Exit Span");
         }
 
+        //查看ExitSpan ,ExitSpan实现了WithPeerInfo
         WithPeerInfo spanWithPeer = (WithPeerInfo)span;
         String peer = spanWithPeer.getPeer();
         int peerId = spanWithPeer.getPeerId();
 
+        //将分布式链路分段相关信息保存到carrier载荷中
+        //保存分段链路id
         carrier.setTraceSegmentId(this.segment.getTraceSegmentId());
+        //spanid
         carrier.setSpanId(span.getSpanId());
 
+        //上级应用实例id
         carrier.setParentApplicationInstanceId(segment.getApplicationInstanceId());
 
         if (DictionaryUtil.isNull(peerId)) {
@@ -123,6 +139,8 @@ public class TracingContext implements AbstractTracerContext {
         } else {
             carrier.setPeerId(peerId);
         }
+
+        //getRefs获取父级调用链的分段引用
         List<TraceSegmentRef> refs = this.segment.getRefs();
         int operationId;
         String operationName;
@@ -164,9 +182,12 @@ public class TracingContext implements AbstractTracerContext {
      */
     @Override
     public void extract(ContextCarrier carrier) {
+        //获取TraceSegmentRef引用,引用上一个链路中的TraceSegment
         TraceSegmentRef ref = new TraceSegmentRef(carrier);
         this.segment.ref(ref);
+        //设置分段的全局id
         this.segment.relatedGlobalTraces(carrier.getDistributedTraceId());
+        //获取最后一个有效的span
         AbstractSpan span = this.activeSpan();
         if (span instanceof EntrySpan) {
             span.ref(ref);
@@ -239,7 +260,7 @@ public class TracingContext implements AbstractTracerContext {
 
     /**
      * Create an entry span
-     *
+     * 创建一个EntrySpan
      * @param operationName most likely a service name
      * @return span instance.
      * Ref to {@link EntrySpan}
@@ -278,6 +299,8 @@ public class TracingContext implements AbstractTracerContext {
                         return new EntrySpan(spanIdGenerator++, parentSpanId, operationName);
                     }
                 });
+
+            //启动,并记录启动时间
             entrySpan.start();
             return push(entrySpan);
         }
@@ -326,11 +349,15 @@ public class TracingContext implements AbstractTracerContext {
     @Override
     public AbstractSpan createExitSpan(final String operationName, final String remotePeer) {
         AbstractSpan exitSpan;
+        //获取调用链中最后一个span
         AbstractSpan parentSpan = peek();
         if (parentSpan != null && parentSpan.isExit()) {
+            //如果parentSpan为exit状态,则表示父级已经退出,则使用parentSpan
             exitSpan = parentSpan;
         } else {
+            //获取当前链路节点的父节点spanId
             final int parentSpanId = parentSpan == null ? -1 : parentSpan.getSpanId();
+
             exitSpan = (AbstractSpan)DictionaryManager.findNetworkAddressSection()
                 .find(remotePeer).doInCondition(
                     new PossibleFound.FoundAndObtain() {
@@ -346,6 +373,7 @@ public class TracingContext implements AbstractTracerContext {
                                     new PossibleFound.FoundAndObtain() {
                                         @Override
                                         public Object doProcess(int operationId) {
+                                            //在这里构建exitSpan
                                             return new ExitSpan(spanIdGenerator++, parentSpanId, operationId, peerId);
                                         }
                                     }, new PossibleFound.NotFoundAndObtain() {
@@ -379,6 +407,8 @@ public class TracingContext implements AbstractTracerContext {
                                     });
                         }
                     });
+
+            //添加这个span
             push(exitSpan);
         }
         exitSpan.start();
@@ -400,7 +430,8 @@ public class TracingContext implements AbstractTracerContext {
     /**
      * Stop the given span, if and only if this one is the top element of {@link #activeSpanStack}. Because the tracing
      * core must make sure the span must match in a stack module, like any program did.
-     *
+     * 停止给定的跨度，当且仅当这个是{@link #activeSpanStack}的顶级元素时
+     * 因为跟踪核心必须确保跨度必须在堆栈模块中匹配，就像任何程序一样。
      * @param span to finish
      */
     @Override
@@ -413,6 +444,7 @@ public class TracingContext implements AbstractTracerContext {
                     pop();
                 }
             } else {
+                //移除当前的span
                 pop();
             }
         } else {
@@ -514,6 +546,7 @@ public class TracingContext implements AbstractTracerContext {
         if (activeSpanStack.isEmpty()) {
             return null;
         }
+        //返回调用链的最后一个span
         return activeSpanStack.getLast();
     }
 

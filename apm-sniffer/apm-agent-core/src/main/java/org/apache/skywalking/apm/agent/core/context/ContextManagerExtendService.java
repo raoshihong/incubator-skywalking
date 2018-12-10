@@ -25,6 +25,7 @@ import org.apache.skywalking.apm.agent.core.conf.Config;
 import org.apache.skywalking.apm.agent.core.sampling.SamplingService;
 
 /**
+ * ContextManagerExtendService 上下文管理扩展service
  * @author wusheng
  */
 @DefaultImplementor
@@ -50,16 +51,26 @@ public class ContextManagerExtendService implements BootService {
         IgnoredTracerContext.ListenerManager.add(manager);
     }
 
+    /**
+     * 创建一个TraceContext
+     * @param operationName
+     * @param forceSampling
+     * @return
+     */
     public AbstractTracerContext createTraceContext(String operationName, boolean forceSampling) {
         AbstractTracerContext context;
         int suffixIdx = operationName.lastIndexOf(".");
         if (suffixIdx > -1 && Config.Agent.IGNORE_SUFFIX.contains(operationName.substring(suffixIdx))) {
             context = new IgnoredTracerContext();
         } else {
+
+            //查找到数据采集服务
             SamplingService samplingService = ServiceManager.INSTANCE.findService(SamplingService.class);
-            if (forceSampling || samplingService.trySampling()) {
+            if (forceSampling || samplingService.trySampling()) {//表示可以尝试采集了
+                //表示可以采集了,则创建一个TracingContext上下文
                 context = new TracingContext();
             } else {
+                //否则忽略这个
                 context = new IgnoredTracerContext();
             }
         }

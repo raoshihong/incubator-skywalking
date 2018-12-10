@@ -26,13 +26,23 @@ import org.apache.skywalking.apm.network.trace.component.Component;
 /**
  * The <code>ExitSpan</code> represents a service consumer point, such as Feign, Okhttp client for a Http service.
  *
+ * ExitSpan代表服务消费者点，例如用于Http服务的Feign，Okhttp客户端。实际就是出口
+ *
  * It is an exit point or a leaf span(our old name) of trace tree.
+ * 它是跟踪树的出口点或叶子span（我们的旧名称）。
  * In a single rpc call, because of a combination of discovery libs, there maybe contain multi-layer exit point:
+ *
+ * 在单个rpc调用中，由于发现库的组合，可能包含多层出口点：
  *
  * The <code>ExitSpan</code> only presents the first one.
  *
+ * ExitSpan仅仅会代表第一个
+ *
  * Such as: Dubbox - Apache Httpcomponent - ...(Remote)
  * The <code>ExitSpan</code> represents the Dubbox span, and ignore the httpcomponent span's info.
+ *
+ * 例如这个调用链：Dubbox -> Apache Httpcomponent -> .... (Remote) 这种远程调用
+ * 那么ExitSpan只会代表Dubbox span，而会忽略httpcomponent span 的信息以及后面相关调用链的信息
  *
  * @author wusheng
  */

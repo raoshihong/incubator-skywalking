@@ -24,12 +24,20 @@ import org.apache.skywalking.apm.network.trace.component.Component;
 /**
  * The <code>EntrySpan</code> represents a service provider point, such as Tomcat server entrance.
  *
+ * EntrySpan表示服务提供者点，例如Tomcat服务器入口。实际就是入口
+ *
  * It is a start point of {@link TraceSegment}, even in a complex application, there maybe have multi-layer entry point,
  * the <code>EntrySpan</code> only represents the first one.
  *
+ * 它是{@link TraceSegment}的起点，即使在复杂的应用程序中，也可能有多层入口点，EntrySpan只代表第一个。
+ *
  * But with the last <code>EntrySpan</code>'s tags and logs, which have more details about a service provider.
  *
+ * 但是使用最后一个EntrySpan的标签和日志，其中包含有关服务提供商的更多详细信息。
+ *
  * Such as: Tomcat Embed - Dubbox The <code>EntrySpan</code> represents the Dubbox span.
+ *
+ * 如：Tomcat Embed  -  Dubbox EntrySpan代表Dubbox span
  *
  * @author wusheng
  */

@@ -32,22 +32,28 @@ import org.apache.skywalking.apm.util.StringUtil;
  * {@link ContextCarrier} is a data carrier of {@link TracingContext}.
  * It holds the snapshot (current state) of {@link TracingContext}.
  * <p>
+ *
+ * {@link ContextCarrier}是{@link TracingContext}的数据载体。 它保存{@link TracingContext}的快照（当前状态）。
+ *
  * Created by wusheng on 2017/2/17.
  */
 public class ContextCarrier implements Serializable {
     /**
      * {@link TraceSegment#traceSegmentId}
+     * 链路跟踪分段id
      */
     private ID traceSegmentId;
 
     /**
      * id of parent span.
      * It is unique in parent trace segment.
+     * 父级span分段的id
      */
     private int spanId = -1;
 
     /**
      * id of parent application instance, it's the id assigned by collector.
+     * 父应用程序实例的id，它是收集器分配的id。
      */
     private int parentApplicationInstanceId = DictionaryUtil.nullValue();
 

@@ -25,6 +25,7 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
+import org.apache.skywalking.apm.agent.core.boot.BootService;
 import org.apache.skywalking.apm.agent.core.boot.ServiceManager;
 import org.apache.skywalking.apm.agent.core.logging.api.ILog;
 import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
@@ -85,7 +86,7 @@ public class SkyWalkingAgent {
 
         try {
             //利用枚举的方式创建了一个ServiceManager单利(666),ServiceManager用来管理BootService
-            ServiceManager.INSTANCE.boot();
+            ServiceManager.INSTANCE.boot();//比如;@DefaultImplementor  public class CollectorDiscoveryService implements BootService 启动这个服务去发现apm-collector服务
         } catch (Exception e) {
             logger.error(e, "Skywalking agent boot failure.");
         }

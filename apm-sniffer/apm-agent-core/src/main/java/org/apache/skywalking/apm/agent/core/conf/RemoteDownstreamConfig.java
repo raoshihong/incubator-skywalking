@@ -25,9 +25,11 @@ import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
 
 /**
  * The <code>RemoteDownstreamConfig</code> includes configurations from collector side.
+ * RemoteDownstreamConfig包括收集器端的配置。
  * All of them initialized null, Null-Value or empty collection.
+ * 所有这些都初始化了null，Null-Value或空集合。
  *
- * 远程配置
+ * 远程配置,这个类的配置信息可以查看CollectorDiscoveryService这个调度服务,这个服务会定时去发现apm-collector服务,并呼气配置信息
  *
  * @author wusheng
  */

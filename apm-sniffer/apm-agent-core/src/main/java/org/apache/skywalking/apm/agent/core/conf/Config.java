@@ -25,7 +25,7 @@ import org.apache.skywalking.apm.agent.core.logging.core.WriterFactory;
 
 /**
  * This is the core config in sniffer agent.
- *
+ * agent的核心配置
  * @author wusheng
  */
 public class Config {

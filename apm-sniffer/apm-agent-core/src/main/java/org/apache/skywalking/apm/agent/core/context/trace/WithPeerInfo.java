@@ -20,6 +20,7 @@
 package org.apache.skywalking.apm.agent.core.context.trace;
 
 /**
+ * 窥视者信息
  * @author wusheng
  */
 public interface WithPeerInfo {

@@ -37,10 +37,16 @@ import org.apache.skywalking.apm.util.RunnableWithExceptionProtection;
  * The <code>SamplingService</code> take charge of how to sample the {@link TraceSegment}. Every {@link TraceSegment}s
  * have been traced, but, considering CPU cost of serialization/deserialization, and network bandwidth, the agent do NOT
  * send all of them to collector, if SAMPLING is on.
+ *
+ * SamplingService负责如何对{@link TraceSegment}进行采样。 已跟踪每个{@link TraceSegment}，
+ * 但是，考虑到序列化/反序列化的CPU成本和网络带宽，如果启用了SAMPLING，则代理不会将所有这些成员发送到收集器。
+ *
  * <p>
  * By default, SAMPLING is on, and  {@link Config.Agent#SAMPLE_N_PER_3_SECS }
  *
  * @author wusheng
+ *
+ * 数据采集服务
  */
 @DefaultImplementor
 public class SamplingService implements BootService {
@@ -55,6 +61,10 @@ public class SamplingService implements BootService {
 
     }
 
+    /**
+     * 执行数据采集
+     * @throws Throwable
+     */
     @Override
     public void boot() throws Throwable {
         if (scheduledFuture != null) {

@@ -111,8 +111,11 @@
                                 <mkdir dir="${project.basedir}/../../skywalking-agent/config" />
                                 <mkdir dir="${project.basedir}/../../skywalking-agent/logs" />
                                 <copydir src="${project.basedir}/../config" dest="${project.basedir}/../../skywalking-agent/config" forceoverwrite="true" />
-                                <!-- -->
-                                <copydir src="${project.basedir}/../config" dest="${project.basedir}/../../skywalking-agent/target/config" forceoverwrite="true" />
+                                <!-- 将config拷贝到target目录下便于调试 -->
+                                <copydir src="${project.basedir}/../config" dest="${project.basedir}/target/config" forceoverwrite="true" />
+                                <!-- 将plugins拷贝到target目录下便于调试plugin -->
+                                <mkdir dir="${project.basedir}/target/plugins" />
+                                <copy file="${project.basedir}/../../skywalking-agent/plugins/study-my-plugin-5.0.0-beta2.jar" tofile="${project.basedir}/target/plugins/study-my-plugin-5.0.0-beta2.jar" overwrite="true" />
                             </tasks>
                         </configuration>
                     </execution>

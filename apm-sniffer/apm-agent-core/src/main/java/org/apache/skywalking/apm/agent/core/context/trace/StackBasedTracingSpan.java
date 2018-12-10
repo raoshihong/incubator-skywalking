@@ -24,9 +24,9 @@ import org.apache.skywalking.apm.agent.core.dictionary.PossibleFound;
 
 /**
  * The <code>StackBasedTracingSpan</code> represents a span with an inside stack construction.
- *
+ * StackBasedTracingSpan代表的是一个具有内部堆栈构造的链路span。
  * This kind of span can start and finish multi times in a stack-like invoke line.
- *
+ * 这种span可以在类似堆栈的调用行中多次开始和结束。
  * @author wusheng
  */
 public abstract class StackBasedTracingSpan extends AbstractTracingSpan {

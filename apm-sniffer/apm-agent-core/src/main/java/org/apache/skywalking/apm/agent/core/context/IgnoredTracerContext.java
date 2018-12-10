@@ -26,9 +26,13 @@ import org.apache.skywalking.apm.agent.core.context.trace.NoopSpan;
 
 /**
  * The <code>IgnoredTracerContext</code> represent a context should be ignored.
+ * IgnoredTracerContext表示应忽略上下文。
  * So it just maintains the stack with an integer depth field.
  *
+ * 所以它只是用一个整数stackDepth来记录调用栈的深度。
+ *
  * All operations through this will be ignored, and keep the memory and gc cost as low as possible.
+ * 通过此操作的所有操作都将被忽略，并尽可能降低内存和gc成本。
  *
  * @author wusheng
  */
@@ -85,6 +89,7 @@ public class IgnoredTracerContext implements AbstractTracerContext {
 
     @Override
     public AbstractSpan createExitSpan(String operationName, String remotePeer) {
+        //如果是IgnoredTraceContext,则只记录调用链的深度
         stackDepth++;
         return NOOP_SPAN;
     }

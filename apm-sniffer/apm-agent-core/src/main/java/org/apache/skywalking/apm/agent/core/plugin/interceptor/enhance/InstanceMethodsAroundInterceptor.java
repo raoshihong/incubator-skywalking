@@ -24,13 +24,16 @@ import java.lang.reflect.Method;
 /**
  * A interceptor, which intercept method's invocation. The target methods will be defined in {@link
  * ClassEnhancePluginDefine}'s subclass, most likely in {@link ClassInstanceMethodsEnhancePluginDefine}
+ * 拦截器，拦截方法的调用。 目标方法将在{@link ClassEnhancePluginDefine}的子类中定义，最有可能在{@link ClassInstanceMethodsEnhancePluginDefine}中定义
+ *
+ * skywalking插件增强代理拦截器的基类,在插件中定义的拦截器都需要实现这个接口
  *
  * @author wusheng
  */
 public interface InstanceMethodsAroundInterceptor {
     /**
      * called before target method invocation.
-     *
+     *  目标方法调用之前拦截调用
      * @param result change this result, if you want to truncate the method.
      * @throws Throwable
      */
@@ -39,7 +42,7 @@ public interface InstanceMethodsAroundInterceptor {
 
     /**
      * called after target method invocation. Even method's invocation triggers an exception.
-     *
+     * 在目标方法调用之后调用。 甚至方法的调用也会触发异常。
      * @param method
      * @param ret the method's original return value.
      * @return the method's actual return value.
@@ -50,7 +53,7 @@ public interface InstanceMethodsAroundInterceptor {
 
     /**
      * called when occur exception.
-     *
+     * 目标方法抛出异常时调用
      * @param method
      * @param t the exception occur.
      */

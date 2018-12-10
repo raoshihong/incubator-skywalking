@@ -21,6 +21,7 @@ package org.apache.skywalking.apm.agent.core.context.trace;
 
 /**
  * The <code>LocalSpan</code> represents a normal tracing point, such as a local method.
+ * LocalSpan表示正常的跟踪点，例如本地方法。
  *
  * @author wusheng
  */
