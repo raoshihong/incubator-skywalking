@@ -1,6 +1,7 @@
 package com.rao.study;
 
 import com.rao.study.plugin.demo.TimeDemo;
+import com.rao.study.plugin.demo.TraceDemo;
 
 import java.sql.Time;
 
@@ -12,5 +13,8 @@ public class SkyWalkingAgentTest {
         TimeDemo timeDemo = new TimeDemo();
         timeDemo.fun1();
         timeDemo.fun2();
+
+        TraceDemo traceDemo = new TraceDemo();
+        traceDemo.funTrace();
     }
 }
