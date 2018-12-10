@@ -58,6 +58,7 @@
         <module>hystrix-1.x-plugin</module>
         <module>sofarpc-plugin</module>
         <module>study-my-plugin</module>
+        <module>study-apm-trace</module>
     </modules>
     <packaging>pom</packaging>
 

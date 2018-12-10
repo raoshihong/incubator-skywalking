@@ -50,6 +50,7 @@ public class StatementExecuteMethodsInterceptor implements InstanceMethodsAround
          */
         if (connectInfo != null) {
 
+            //因为不是起点,生产者方,所以创建的是一个ExitSpan
             AbstractSpan span = ContextManager.createExitSpan(buildOperationName(connectInfo, method.getName(), cacheObject.getStatementName()), connectInfo.getDatabasePeer());
             Tags.DB_TYPE.set(span, "sql");
             Tags.DB_INSTANCE.set(span, connectInfo.getDatabaseName());

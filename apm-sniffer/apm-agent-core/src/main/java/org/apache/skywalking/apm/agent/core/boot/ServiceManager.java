@@ -80,10 +80,12 @@ public enum ServiceManager {
         load(allServices);
         Iterator<BootService> serviceIterator = allServices.iterator();
         while (serviceIterator.hasNext()) {
+            //获取每一个BootService服务
             BootService bootService = serviceIterator.next();
 
             Class<? extends BootService> bootServiceClass = bootService.getClass();
 
+            //判断这个服务类是否有@DefaultImplementor注解,比如CollectorDiscoveryService
             boolean isDefaultImplementor = bootServiceClass.isAnnotationPresent(DefaultImplementor.class);
             if (isDefaultImplementor) {
                 if (!bootedServices.containsKey(bootServiceClass)) {

@@ -89,6 +89,7 @@ public class DubboInterceptor implements InstanceMethodsAroundInterceptor {
 
             //消费者端/接收端,所以创建的是一个ExitSpan
             //generateOperationName 记录操作者名称
+            //作为本服务最终出口,则创建一个ExitSpan
             span = ContextManager.createExitSpan(generateOperationName(requestURL, invocation), contextCarrier, host + ":" + port);
             //invocation.getAttachments().put("contextData", contextDataStr);
             //@see https://github.com/alibaba/dubbo/blob/dubbo-2.5.3/dubbo-rpc/dubbo-rpc-api/src/main/java/com/alibaba/dubbo/rpc/RpcInvocation.java#L154-L161
@@ -99,7 +100,7 @@ public class DubboInterceptor implements InstanceMethodsAroundInterceptor {
                 rpcContext.getAttachments().put(next.getHeadKey(), next.getHeadValue());
             }
         } else {
-            //消费者
+            //生产者
             ContextCarrier contextCarrier = new ContextCarrier();
             CarrierItem next = contextCarrier.items();
             //处理attachment
@@ -108,6 +109,7 @@ public class DubboInterceptor implements InstanceMethodsAroundInterceptor {
                 next.setHeadValue(rpcContext.getAttachment(next.getHeadKey()));
             }
 
+            //主动发起的,则创建一个EntrySpan
             //创建一个EntrySpan
             span = ContextManager.createEntrySpan(generateOperationName(requestURL, invocation), contextCarrier);
         }
