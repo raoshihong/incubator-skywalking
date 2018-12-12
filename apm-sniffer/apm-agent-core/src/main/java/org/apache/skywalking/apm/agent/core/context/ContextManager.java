@@ -66,7 +66,7 @@ public class ContextManager implements TracingContextListener, BootService, Igno
                 }
                 context = new IgnoredTracerContext();
             } else {
-                //判断是否有collector服务器
+                //判断是否有被大力的服务器,注:目标服务需要是正在运行的应用,而不是立马退出
                 if (RemoteDownstreamConfig.Agent.APPLICATION_ID != DictionaryUtil.nullValue()
                     && RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID != DictionaryUtil.nullValue()
                     ) {

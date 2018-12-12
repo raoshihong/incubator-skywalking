@@ -125,6 +125,7 @@ public class JVMService implements BootService, Runnable {
     @Override
     public void run() {
         //搜集jvm的相关信息,如cpu,memory,gc等,将搜集到的信息放到queue队列中
+        //先判断是否有被代理的应用,通过id和instance_id来判断
         if (RemoteDownstreamConfig.Agent.APPLICATION_ID != DictionaryUtil.nullValue()
             && RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID != DictionaryUtil.nullValue()
             ) {
