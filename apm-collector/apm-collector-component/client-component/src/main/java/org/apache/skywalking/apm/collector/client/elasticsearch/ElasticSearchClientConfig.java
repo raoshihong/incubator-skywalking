@@ -29,6 +29,8 @@ public abstract class ElasticSearchClientConfig extends ModuleConfig {
     private boolean clusterTransportSniffer;
     private String clusterNodes;
     private String namespace;
+    private boolean xpackSecurityTransportSslEnabled;
+    private String xpackSecurityUser;
 
     public String getClusterName() {
         return clusterName;
@@ -60,5 +62,21 @@ public abstract class ElasticSearchClientConfig extends ModuleConfig {
 
     public void setNamespace(String namespace) {
         this.namespace = namespace;
+    }
+
+    public boolean getXpackSecurityTransportSslEnabled() {
+        return xpackSecurityTransportSslEnabled;
+    }
+
+    public void setXpackSecurityTransportSslEnabled(boolean xpackSecurityTransportSslEnabled) {
+        this.xpackSecurityTransportSslEnabled = xpackSecurityTransportSslEnabled;
+    }
+
+    public String getXpackSecurityUser() {
+        return xpackSecurityUser;
+    }
+
+    public void setXpackSecurityUser(String xpackSecurityUser) {
+        this.xpackSecurityUser = xpackSecurityUser;
     }
 }

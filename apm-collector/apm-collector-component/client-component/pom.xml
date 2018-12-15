@@ -75,6 +75,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- 增加elasticsearch对x-pack的支持 -->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>x-pack-transport</artifactId>
+            <version>5.5.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.zookeeper</groupId>
             <artifactId>zookeeper</artifactId>

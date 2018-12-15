@@ -41,6 +41,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.reindex.*;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient;
 import org.slf4j.*;
 
 /**
@@ -60,6 +61,10 @@ public class ElasticSearchClient implements Client {
 
     private final NameSpace namespace;
 
+    private boolean xpackSecurityTransportSslEnabled;
+
+    private String xpackSecurityUser;
+
     public ElasticSearchClient(String clusterName, boolean clusterTransportSniffer,
         String clusterNodes) {
         this.clusterName = clusterName;
@@ -69,21 +74,54 @@ public class ElasticSearchClient implements Client {
     }
 
     public ElasticSearchClient(String clusterName, boolean clusterTransportSniffer,
-        String clusterNodes, NameSpace namespace) {
+                               String clusterNodes,boolean xpackSecurityTransportSslEnabled,String xpackSecurityUser) {
+        this.clusterName = clusterName;
+        this.clusterTransportSniffer = clusterTransportSniffer;
+        this.clusterNodes = clusterNodes;
+        this.xpackSecurityTransportSslEnabled = xpackSecurityTransportSslEnabled;
+        this.xpackSecurityUser = xpackSecurityUser;
+        this.namespace = new NameSpace();
+    }
+
+    public ElasticSearchClient(String clusterName, boolean clusterTransportSniffer,
+                                String clusterNodes, NameSpace namespace) {
         this.clusterName = clusterName;
         this.clusterTransportSniffer = clusterTransportSniffer;
         this.clusterNodes = clusterNodes;
         this.namespace = namespace;
     }
 
+    public ElasticSearchClient(String clusterName, boolean clusterTransportSniffer,
+                               String clusterNodes, NameSpace namespace,boolean xpackSecurityTransportSslEnabled,String xpackSecurityUser) {
+        this.clusterName = clusterName;
+        this.clusterTransportSniffer = clusterTransportSniffer;
+        this.clusterNodes = clusterNodes;
+        this.namespace = namespace;
+        this.xpackSecurityTransportSslEnabled = xpackSecurityTransportSslEnabled;
+        this.xpackSecurityUser = xpackSecurityUser;
+    }
+
     @Override
     public void initialize() throws ClientException {
-        Settings settings = Settings.builder()
-            .put("cluster.name", clusterName)
-            .put("client.transport.sniff", clusterTransportSniffer)
-            .build();
+        Settings settings;
+        if(null!=xpackSecurityUser){
+            settings = Settings.builder()
+                    .put("cluster.name", clusterName)
+                    .put("client.transport.sniff", clusterTransportSniffer)
+                    .put("xpack.security.transport.ssl.enabled",xpackSecurityTransportSslEnabled)//添加对x-pack的支持
+                    .put("xpack.security.user",xpackSecurityUser)//默认账号密码
+                    .build();
+            client = new PreBuiltXPackTransportClient(settings);
+        }else{
+            settings = Settings.builder()
+                    .put("cluster.name", clusterName)
+                    .put("client.transport.sniff", clusterTransportSniffer)
+                    .build();
+            client = new PreBuiltTransportClient(settings);
+        }
 
-        client = new PreBuiltTransportClient(settings);
+
+
 
         List<AddressPairs> pairsList = parseClusterNodes(clusterNodes);
         for (AddressPairs pairs : pairsList) {

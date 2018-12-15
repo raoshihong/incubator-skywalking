@@ -102,7 +102,7 @@ public class StorageModuleEsProvider extends ModuleProvider {
     }
 
     @Override public void prepare() throws ServiceNotProvidedException {
-        elasticSearchClient = new ElasticSearchClient(config.getClusterName(), config.getClusterTransportSniffer(), config.getClusterNodes(), nameSpace);
+        elasticSearchClient = new ElasticSearchClient(config.getClusterName(), config.getClusterTransportSniffer(), config.getClusterNodes(), nameSpace,config.getXpackSecurityTransportSslEnabled(),config.getXpackSecurityUser());
 
         this.registerServiceImplementation(ITTLConfigService.class, new TTLConfigService(config));
         this.registerServiceImplementation(IBatchDAO.class, new BatchProcessEsDAO(elasticSearchClient, config.getBulkActions(), config.getBulkSize(), config.getFlushInterval(), config.getConcurrentRequests()));

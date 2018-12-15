@@ -87,6 +87,8 @@ storage:
     hourMetricDataTTL: 36 # Unit is hour
     dayMetricDataTTL: 45 # Unit is day
     monthMetricDataTTL: 18 # Unit is month
+    xpackSecurityTransportSslEnabled: false
+    xpackSecurityUser: elastic:changeme
 #storage:
 #  h2:
 #    url: jdbc:h2:~/memorydb
