@@ -27,6 +27,8 @@ public class CallableOrRunnableConstructInterceptor implements InstanceConstruct
     @Override
     public void onConstruct(EnhancedInstance objInst, Object[] allArguments) {
         if (ContextManager.isActive()) {
+            //在构造方法时先存储父线程的trace快照信息
+            //在构造方法里调用ThreadLocal,此时ThreadLocal中的线程为父线程
             objInst.setSkyWalkingDynamicField(ContextManager.capture());
         }
     }

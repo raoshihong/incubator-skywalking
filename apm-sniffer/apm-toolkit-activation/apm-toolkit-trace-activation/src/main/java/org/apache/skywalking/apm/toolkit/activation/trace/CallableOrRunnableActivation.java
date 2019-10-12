@@ -76,6 +76,7 @@ public class CallableOrRunnableActivation extends ClassInstanceMethodsEnhancePlu
     }
 
     @Override protected ClassMatch enhanceClass() {
+        //对带有这个注解的方法进行拦截
         return byClassAnnotationMatch(new String[] {ANNOTATION_NAME});
     }
 

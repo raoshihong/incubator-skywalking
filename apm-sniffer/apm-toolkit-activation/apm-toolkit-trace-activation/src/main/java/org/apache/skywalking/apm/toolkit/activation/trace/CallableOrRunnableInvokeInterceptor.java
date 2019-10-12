@@ -32,8 +32,10 @@ public class CallableOrRunnableInvokeInterceptor implements InstanceMethodsAroun
     public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
         MethodInterceptResult result) throws Throwable {
         ContextManager.createLocalSpan("Thread/" + objInst.getClass().getName() + "/" + method.getName());
+        //调用方法前,取出之前在构造方法中存储的快照信息,这个快照信息就是父线程的相关链路信息
         ContextSnapshot cachedObjects = (ContextSnapshot)objInst.getSkyWalkingDynamicField();
         if (cachedObjects != null) {
+            //在子线程中构建自己的链路信息,并与父线程的快照链路信息进行关联
             ContextManager.continued(cachedObjects);
         }
     }
